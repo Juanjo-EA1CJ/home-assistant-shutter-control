@@ -1,0 +1,262 @@
+partial_close_all_shutters:
+  alias: Cerrar todas las persianas parcialmente (por fases)
+  sequence:
+    # Fase 1: Cocina
+    - service: cover.set_cover_position
+      data:
+        position: 15
+      target:
+        entity_id:
+          - cover.shellyswitch25_c8c9a37a5e92 # Cocina Puerta
+          - cover.shellyswitch25_c8c9a375bc1b # Cocina Oeste
+          - cover.cocina_norte # Cocina Norte
+    - wait_template: >
+        {{ (state_attr('cover.shellyswitch25_c8c9a37a5e92', 'current_cover_position') | int(0)) == 15 and
+           (state_attr('cover.shellyswitch25_c8c9a375bc1b', 'current_cover_position') | int(0)) == 15 and
+           (state_attr('cover.cocina_norte', 'current_cover_position') | int(0)) == 15 }}
+      timeout: '60' # Ajustar según el tiempo real de viaje a la posición 15 [1]
+      continue_on_timeout: false # Detener el script si una persiana se atasca [1]
+
+    # Fase 2: Baño y Habitación Abajo
+    - service: cover.set_cover_position
+      data:
+        position: 15
+      target:
+        entity_id:
+          - cover.shellyswitch25_3494546f0eac # Baño
+    - service: cover.set_cover_position
+      data:
+        position: 17
+      target:
+        entity_id:
+          - cover.shellyswitch25_c8c9a375b1b6 # Habitación Abajo 01
+    - service: cover.set_cover_position
+      data:
+        position: 19
+      target:
+        entity_id:
+          - cover.shellyswitch25_c8c9a37a68b0 # Habitación Abajo 02
+    - wait_template: >
+        {{ (state_attr('cover.shellyswitch25_3494546f0eac', 'current_cover_position') | int(0)) == 15 and
+           (state_attr('cover.shellyswitch25_c8c9a375b1b6', 'current_cover_position') | int(0)) == 17 and
+           (state_attr('cover.shellyswitch25_c8c9a37a68b0', 'current_cover_position') | int(0)) == 19 }}
+      timeout: '60' # Ajustar según el tiempo real de viaje [1]
+      continue_on_timeout: false
+
+    # Fase 3: Habitación Arriba y Cuarto Radio
+    - service: cover.set_cover_position
+      data:
+        position: 15
+      target:
+        entity_id:
+          - cover.shellyswitch25_c8c9a37a6489 # Habitación Arriba Este
+          - cover.shellyswitch25_c8c9a375ae0e # Habitación Arriba Oeste
+          - cover.cuarto_de_radio # Cuarto de Radio
+    - wait_template: >
+        {{ (state_attr('cover.shellyswitch25_c8c9a37a6489', 'current_cover_position') | int(0)) == 15 and
+           (state_attr('cover.shellyswitch25_c8c9a375ae0e', 'current_cover_position') | int(0)) == 15 and
+           (state_attr('cover.cuarto_de_radio', 'current_cover_position') | int(0)) == 15 }}
+      timeout: '60' # Ajustar según el tiempo real de viaje [1]
+      continue_on_timeout: false
+
+    # Fase 4: Salón Sur y Entrada
+    - service: cover.set_cover_position
+      data:
+        position: 12
+      target:
+        entity_id:
+          - cover.salon_sur # Salón Sur
+    - service: cover.set_cover_position
+      data:
+        position: 15
+      target:
+        entity_id:
+          - cover.shellyswitch25_c8c9a37a683a # Salón Entrada
+    - wait_template: >
+        {{ (state_attr('cover.salon_sur', 'current_cover_position') | int(0)) == 12 and
+           (state_attr('cover.shellyswitch25_c8c9a37a683a', 'current_cover_position') | int(0)) == 15 }}
+      timeout: '60' # Ajustar según el tiempo real de viaje [1]
+      continue_on_timeout: false
+
+    # Fase 5: Salón Triple
+    - service: cover.set_cover_position
+      data:
+        position: 16
+      target:
+        entity_id:
+          - cover.shellyswitch25_98cdac2b9bbe # Salón Triple 01
+          - cover.shellyswitch25_98cdac2b7c27 # Salón Triple 02
+          - cover.shellyswitch25_c8c9a375c3b0 # Salón Triple 03
+    # No se necesita wait_template después de la última fase si no hay acciones posteriores
+  mode: single
+
+close_all_shutters_phased:
+  alias: Cerrar persianas por fases
+  sequence:
+    # Fase 1: Cocina
+    - service: cover.close_cover
+      data:
+        entity_id:
+          - cover.shellyswitch25_c8c9a37a5e92
+          - cover.shellyswitch25_c8c9a375bc1b
+          - cover.cocina_norte
+    - wait_template: >
+        {{ is_state('cover.shellyswitch25_c8c9a37a5e92', 'closed') and
+           is_state('cover.shellyswitch25_c8c9a375bc1b', 'closed') and
+           is_state('cover.cocina_norte', 'closed') }}
+      timeout: '120'
+      continue_on_timeout: false # Añadido para robustez [1]
+
+    # Fase 2: Baño + Habitación Abajo
+    - service: cover.close_cover
+      data:
+        entity_id:
+          - cover.shellyswitch25_3494546f0eac
+          - cover.shellyswitch25_c8c9a375b1b6
+          - cover.shellyswitch25_c8c9a37a68b0
+    - wait_template: >
+        {{ is_state('cover.shellyswitch25_3494546f0eac', 'closed') and
+           is_state('cover.shellyswitch25_c8c9a375b1b6', 'closed') and
+           is_state('cover.shellyswitch25_c8c9a37a68b0', 'closed') }}
+      timeout: '120'
+      continue_on_timeout: false # Añadido para robustez [1]
+
+    # Fase 3: Habitación Arriba
+    - service: cover.close_cover
+      data:
+        entity_id:
+          - cover.shellyswitch25_c8c9a37a6489
+          - cover.shellyswitch25_c8c9a375ae0e
+    - wait_template: >
+        {{ is_state('cover.shellyswitch25_c8c9a37a6489', 'closed') and
+           is_state('cover.shellyswitch25_c8c9a375ae0e', 'closed') }}
+      timeout: '120'
+      continue_on_timeout: false # Añadido para robustez [1]
+
+    # Fase 4: Salón Sur y Entrada
+    - service: cover.close_cover
+      data:
+        entity_id:
+          - cover.salon_sur
+          - cover.shellyswitch25_c8c9a37a683a
+    - wait_template: >
+        {{ is_state('cover.salon_sur', 'closed') and
+           is_state('cover.shellyswitch25_c8c9a37a683a', 'closed') }}
+      timeout: '120'
+      continue_on_timeout: false # Añadido para robustez [1]
+
+    # Fase 5: Salón Triple
+    - service: cover.close_cover
+      data:
+        entity_id:
+          - cover.shellyswitch25_98cdac2b9bbe
+          - cover.shellyswitch25_98cdac2b7c27
+          - cover.shellyswitch25_c8c9a375c3b0
+    - wait_template: >
+        {{ is_state('cover.shellyswitch25_98cdac2b9bbe', 'closed') and
+           is_state('cover.shellyswitch25_98cdac2b7c27', 'closed') and
+           is_state('cover.shellyswitch25_c8c9a375c3b0', 'closed') }}
+      timeout: '180'
+      continue_on_timeout: false # Añadido para robustez [1]
+
+    # Fase 6: Cuarto de Radio
+    - service: cover.close_cover
+      data:
+        entity_id:
+          - cover.cuarto_de_radio
+    - wait_template: >
+        {{ is_state('cover.cuarto_de_radio', 'closed') }}
+      timeout: '120'
+      continue_on_timeout: false # Añadido para robustez [1]
+  mode: single
+
+open_all_shutters_phased:
+  alias: Abrir persianas por fases
+  sequence:
+    # Fase 1: Salón Triple
+    - service: cover.open_cover
+      data:
+        entity_id:
+          - cover.shellyswitch25_98cdac2b9bbe
+          - cover.shellyswitch25_98cdac2b7c27
+          - cover.shellyswitch25_c8c9a375c3b0
+    - wait_template: >
+        {{ is_state('cover.shellyswitch25_98cdac2b9bbe', 'open') and
+           is_state('cover.shellyswitch25_98cdac2b7c27', 'open') and
+           is_state('cover.shellyswitch25_c8c9a375c3b0', 'open') }}
+      timeout: '180'
+      continue_on_timeout: false # Añadido para robustez [1]
+
+    # Fase 2: Salón Sur y Entrada
+    - service: cover.open_cover
+      data:
+        entity_id:
+          - cover.salon_sur
+          - cover.shellyswitch25_c8c9a37a683a
+    - wait_template: >
+        {{ is_state('cover.salon_sur', 'open') and
+           is_state('cover.shellyswitch25_c8c9a37a683a', 'open') }}
+      timeout: '120'
+      continue_on_timeout: false # Añadido para robustez [1]
+
+    # Fase 3: Habitación Arriba
+    - service: cover.open_cover
+      data:
+        entity_id:
+          - cover.shellyswitch25_c8c9a37a6489
+          - cover.shellyswitch25_c8c9a375ae0e
+    - wait_template: >
+        {{ is_state('cover.shellyswitch25_c8c9a37a6489', 'open') and
+           is_state('cover.shellyswitch25_c8c9a375ae0e', 'open') }}
+      timeout: '120'
+      continue_on_timeout: false # Añadido para robustez [1]
+
+    # Fase 4: Baño + Habitación Abajo
+    - service: cover.open_cover
+      data:
+        entity_id:
+          - cover.shellyswitch25_3494546f0eac
+          - cover.shellyswitch25_c8c9a375b1b6
+          - cover.shellyswitch25_c8c9a37a68b0
+    - wait_template: >
+        {{ is_state('cover.shellyswitch25_3494546f0eac', 'open') and
+           is_state('cover.shellyswitch25_c8c9a375b1b6', 'open') and
+           is_state('cover.shellyswitch25_c8c9a37a68b0', 'open') }}
+      timeout: '120'
+      continue_on_timeout: false # Añadido para robustez [1]
+
+    # Fase 5: Cocina
+    - service: cover.open_cover
+      data:
+        entity_id:
+          - cover.shellyswitch25_c8c9a37a5e92
+          - cover.shellyswitch25_c8c9a375bc1b
+          - cover.cocina_norte
+    - wait_template: >
+        {{ is_state('cover.shellyswitch25_c8c9a37a5e92', 'open') and
+           is_state('cover.shellyswitch25_c8c9a375bc1b', 'open') and
+           is_state('cover.cocina_norte', 'open') }}
+      timeout: '120'
+      continue_on_timeout: false # Añadido para robustez [1]
+
+    # Fase 6: Cuarto de Radio (Nueva fase añadida)
+    - service: cover.open_cover
+      data:
+        entity_id:
+          - cover.cuarto_de_radio
+    - wait_template: >
+        {{ is_state('cover.cuarto_de_radio', 'open') }}
+      timeout: '120'
+      continue_on_timeout: false # Añadido para robustez [1]
+  mode: single
+
+stop_all_shutter_scripts:
+  alias: Cancelar control de persianas
+  sequence:
+    - service: script.turn_off
+      target:
+        entity_id:
+          - script.close_all_shutters_phased
+          - script.open_all_shutters_phased
+          - script.partial_close_all_shutters
+  mode: single
