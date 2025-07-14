@@ -1,8 +1,6 @@
-# home-assistant-shutter-control
+# Home Assistant shutter control
 
-Shutter control script
-
-A script to control my home shutters by phases.
+Shutter control script, a script to control my home shutters by phases.
 
 Script file is composed of 3 parts:
 
