@@ -1,8 +1,8 @@
 # home-assistant-shutter-control
 
-Shutter control 
+Shutter control script
 
-A script file to control my home shutters.
+A script to control my home shutters by phases.
 
 Script file is composed of 3 parts:
 
